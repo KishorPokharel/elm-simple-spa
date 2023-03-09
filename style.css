@@ -1,0 +1,47 @@
+/* border: 1px solid red; */
+/* background-color: #606c76; */
+/* background-color: #9b4dca; */
+/* border: 1px solid green; */
+
+#app {
+}
+
+header {
+  background-color: #f4f5f6;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+nav {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+}
+
+nav h3 {
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  padding: 1rem;
+  cursor: pointer;
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: auto;
+  padding: 4rem 2rem;
+}
+
+footer {
+  background-color: #f4f5f6;
+  padding: 2rem;
+}
+
+footer p {
+  max-width: 1200px;
+  margin: auto;
+}
