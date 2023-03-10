@@ -4,6 +4,8 @@ import Browser exposing (Document)
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
+import Page.Login as Login
+import Page.Register as Register
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser, s, string)
 
@@ -17,19 +19,21 @@ type alias Model =
 type Msg
     = ClickedLink Browser.UrlRequest
     | ChangedUrl Url
+    | GotLoginMsg Login.Msg
+    | GotRegisterMsg Register.Msg
 
 
 type Page
     = HomePage
-    | AboutPage
-    | ContactPage
+    | LoginPage Login.Model
+    | RegisterPage Register.Model
     | NotFound
 
 
 type Route
     = Home
-    | About
-    | Contact
+    | Login
+    | Register
 
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -56,11 +60,13 @@ loadPage model =
         HomePage ->
             viewHomePage
 
-        AboutPage ->
-            text "About page"
+        LoginPage loginPageModel ->
+            Login.view loginPageModel
+                |> Html.map GotLoginMsg
 
-        ContactPage ->
-            text "Contact page"
+        RegisterPage registerPageModel ->
+            Register.view registerPageModel
+                |> Html.map GotRegisterMsg
 
         NotFound ->
             text "Notfound"
@@ -92,8 +98,8 @@ viewHeader =
             [ h3 [] [ text "Elm SPA" ]
             , div [ class "nav-links" ]
                 [ a [ href "/", class "nav-link" ] [ text "Home" ]
-                , a [ href "/about", class "nav-link" ] [ text "About" ]
-                , a [ href "/contact", class "nav-link" ] [ text "Contact" ]
+                , a [ href "/login", class "nav-link" ] [ text "Login" ]
+                , a [ href "/register", class "nav-link" ] [ text "Register" ]
                 ]
             ]
         ]
@@ -111,6 +117,22 @@ update msg model =
 
         ChangedUrl url ->
             updateUrl url model
+
+        GotLoginMsg loginPageMsg ->
+            case model.page of
+                LoginPage loginPageModel ->
+                    toLogin model (Login.update loginPageMsg loginPageModel)
+
+                _ ->
+                    ( model, Cmd.none )
+
+        GotRegisterMsg registerPageMsg ->
+            case model.page of
+                RegisterPage registerPageModel ->
+                    toRegister model (Register.update registerPageMsg registerPageModel)
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 subscriptions model =
@@ -132,9 +154,19 @@ parser : Parser (Route -> a) a
 parser =
     Parser.oneOf
         [ Parser.map Home Parser.top
-        , Parser.map About (Parser.s "about")
-        , Parser.map Contact (Parser.s "contact")
+        , Parser.map Login (Parser.s "login")
+        , Parser.map Register (Parser.s "register")
         ]
+
+
+toLogin : Model -> ( Login.Model, Cmd Login.Msg ) -> ( Model, Cmd Msg )
+toLogin model ( loginPageModel, cmd ) =
+    ( { model | page = LoginPage loginPageModel }, Cmd.map GotLoginMsg cmd )
+
+
+toRegister : Model -> ( Register.Model, Cmd Register.Msg ) -> ( Model, Cmd Msg )
+toRegister model ( registerPageModel, cmd ) =
+    ( { model | page = RegisterPage registerPageModel }, Cmd.map GotRegisterMsg cmd )
 
 
 updateUrl url model =
@@ -142,11 +174,13 @@ updateUrl url model =
         Just Home ->
             ( { model | page = HomePage }, Cmd.none )
 
-        Just About ->
-            ( { model | page = AboutPage }, Cmd.none )
+        Just Login ->
+            Login.init ()
+                |> toLogin model
 
-        Just Contact ->
-            ( { model | page = ContactPage }, Cmd.none )
+        Just Register ->
+            Register.init ()
+                |> toRegister model
 
         Nothing ->
             ( { model | page = NotFound }, Cmd.none )

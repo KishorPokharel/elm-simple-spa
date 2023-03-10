@@ -45,3 +45,9 @@ footer p {
   max-width: 1200px;
   margin: auto;
 }
+
+.login-form,
+.register-form {
+  max-width: 300px;
+  margin: auto;
+}
